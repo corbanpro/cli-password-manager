@@ -12,8 +12,8 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 
-const CIPHERTEXT_FILE_PATH: &str = "/home/corba/.secrets";
-const CIPHERTEXT_BACKUP_FILE_PATH: &str = "/home/corba/.secrets_backup";
+const CIPHERTEXT_FILE_PATH: &str = "/home/corba/.secrets/secrets.enc";
+const CIPHERTEXT_BACKUP_FILE_PATH: &str = "/home/corba/.secrets/secrets_backup.enc";
 
 #[derive(Serialize, Deserialize)]
 struct SecretsManager {
