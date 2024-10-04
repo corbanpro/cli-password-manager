@@ -1,5 +1,6 @@
 use arboard::Clipboard;
 use colored::Colorize;
+use home::home_dir;
 use rpassword::read_password;
 use serde::{Deserialize, Serialize};
 use serde_encrypt::serialize::impls::BincodeSerializer;
@@ -12,8 +13,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
 
-const CIPHERTEXT_FILE_PATH: &str = "/home/corba/.secrets/secrets.enc";
-const CIPHERTEXT_BACKUP_FILE_PATH: &str = "/home/corba/.secrets/secrets_backup.enc";
+const CIPHERTEXT_FILE_FOLDER: &str = "/.secrets";
+const CIPHERTEXT_FILE_PATH: &str = "/.secrets/secrets.enc";
+const CIPHERTEXT_BACKUP_FILE_PATH: &str = "/.secrets/secrets_backup.enc";
 
 #[derive(Serialize, Deserialize)]
 struct SecretsManager {
@@ -362,7 +364,8 @@ fn print_keys(secrets: &HashMap<String, String>) -> HashMap<String, String> {
 
 fn get_secrets(password: &str) -> Result<HashMap<String, String>, ()> {
     // get secrets buffer
-    let cipher_secrets_buffer = fs::read(CIPHERTEXT_FILE_PATH).expect("Unable to read file");
+    let cipher_secrets_buffer =
+        fs::read(get_home_dir() + CIPHERTEXT_FILE_PATH).expect("Unable to read file");
 
     // decrypt buffer
     let shared_key = SharedKey::new(password_to_key(password));
@@ -377,7 +380,8 @@ fn get_secrets(password: &str) -> Result<HashMap<String, String>, ()> {
 
 fn get_backup_secrets(password: &str) -> Result<HashMap<String, String>, ()> {
     // get backups buffer
-    let cipher_secrets_buffer = fs::read(CIPHERTEXT_BACKUP_FILE_PATH).expect("Unable to read file");
+    let cipher_secrets_buffer =
+        fs::read(get_home_dir() + CIPHERTEXT_BACKUP_FILE_PATH).expect("Unable to read file");
 
     // decrypt buffer
     let shared_key = SharedKey::new(password_to_key(password));
@@ -398,7 +402,11 @@ fn write_secrets(password: &str, secrets: HashMap<String, String>) {
     let serialized_encrypted_message: Vec<u8> = encrypted_message.serialize();
 
     // write out
-    fs::write(CIPHERTEXT_FILE_PATH, serialized_encrypted_message).expect("Unable to write file");
+    fs::write(
+        get_home_dir() + CIPHERTEXT_FILE_PATH,
+        serialized_encrypted_message,
+    )
+    .expect("Unable to write file");
 }
 
 fn write_backup_secrets(password: &str, secrets: HashMap<String, String>) {
@@ -409,8 +417,11 @@ fn write_backup_secrets(password: &str, secrets: HashMap<String, String>) {
     let serialized_encrypted_message: Vec<u8> = encrypted_message.serialize();
 
     // write out
-    fs::write(CIPHERTEXT_BACKUP_FILE_PATH, serialized_encrypted_message)
-        .expect("Unable to write file");
+    fs::write(
+        get_home_dir() + CIPHERTEXT_BACKUP_FILE_PATH,
+        serialized_encrypted_message,
+    )
+    .expect("Unable to write file");
 }
 
 fn password_to_key(password: &str) -> [u8; 32] {
@@ -459,7 +470,7 @@ fn show_diff(
 
 fn init() -> Result<String, String> {
     // check for secrets file
-    let secrets = fs::read(CIPHERTEXT_FILE_PATH);
+    let secrets = fs::read(get_home_dir() + CIPHERTEXT_FILE_PATH);
     if secrets.is_ok() {
         // get password input
         print!("Password: ");
@@ -485,6 +496,9 @@ fn init() -> Result<String, String> {
         return Err("Passwords don't match".to_string());
     }
 
+    fs::create_dir_all(get_home_dir() + CIPHERTEXT_FILE_FOLDER)
+        .expect("Unable to create directory");
+
     // create secret and backup files
     let secrets = HashMap::new();
     write_secrets(&password, secrets.clone());
@@ -492,6 +506,10 @@ fn init() -> Result<String, String> {
     println!("\n{}\n", "Secrets file created".green());
 
     Ok(password)
+}
+
+fn get_home_dir() -> String {
+    home_dir().unwrap().display().to_string()
 }
 
 fn input(prompt: &str) -> String {
