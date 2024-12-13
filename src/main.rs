@@ -63,7 +63,7 @@ fn main() {
             "?" | "h" | "H" | "help" => {
                 println!(
                     "\n{}\n{}\n{}\n[k] Show keys\n[c] Copy secret to clipboard\n[a] Add new secret\n[u] Update secret\n[rn] Rename secret\n[d] Delete secret\n[p] Change password\n{}\n{}\n{}\n[cl] Clear terminal\n[q] Quit\n",
-                    "Actions:".cyan(), "[r] Read secrets".red(), "[s] Search secrets".red(), "[rb] Read backup".red(),"[b] Backup secrets".red(), "[rs] Restore secrets from backup".red() 
+                    "Actions:".cyan(), "[r] Read secrets".red(), "[s] Search secrets".red(), "[rb] Read backup".red(),"[b] Backup secrets".red(), "[rs] Restore secrets from backup".red()
                 );
                 continue;
             }
@@ -227,10 +227,7 @@ fn delete(password: &str) {
     let delete_key = delete_key.unwrap();
 
     // confirm deletion
-    let confirm = input(&format!(
-        "Are you sure you want to delete \"{}\"? [y/N] ",
-        delete_key
-    ));
+    let confirm = input(&format!("Are you sure you want to delete \"{}\"? [y/N] ", delete_key));
 
     // delete
     if confirm == "y" || confirm == "Y" {
@@ -275,8 +272,7 @@ fn backup(password: &str) {
     show_diff(&secrets, &backups);
 
     // confirm changes
-    let confirm =
-        input("\nAre you sure you want to make the above changes to the backup file? [y/N] ");
+    let confirm = input("\nAre you sure you want to make the above changes to the backup file? [y/N] ");
 
     // backup
     if confirm == "y" || confirm == "Y" {
@@ -300,8 +296,7 @@ fn restore_from_backup(password: &str) {
     show_diff(&backups, &secrets);
 
     // confirm change
-    let confirm =
-        input("\nAre you sure you want to make the above changes to the secrets file? [y/N] ");
+    let confirm = input("\nAre you sure you want to make the above changes to the secrets file? [y/N] ");
 
     // backup
     if confirm == "y" || confirm == "Y" {
@@ -364,8 +359,7 @@ fn print_keys(secrets: &HashMap<String, String>) -> HashMap<String, String> {
 
 fn get_secrets(password: &str) -> Result<HashMap<String, String>, ()> {
     // get secrets buffer
-    let cipher_secrets_buffer =
-        fs::read(get_home_dir() + CIPHERTEXT_FILE_PATH).expect("Unable to read file");
+    let cipher_secrets_buffer = fs::read(get_home_dir() + CIPHERTEXT_FILE_PATH).expect("Unable to read file");
 
     // decrypt buffer
     let shared_key = SharedKey::new(password_to_key(password));
@@ -380,8 +374,7 @@ fn get_secrets(password: &str) -> Result<HashMap<String, String>, ()> {
 
 fn get_backup_secrets(password: &str) -> Result<HashMap<String, String>, ()> {
     // get backups buffer
-    let cipher_secrets_buffer =
-        fs::read(get_home_dir() + CIPHERTEXT_BACKUP_FILE_PATH).expect("Unable to read file");
+    let cipher_secrets_buffer = fs::read(get_home_dir() + CIPHERTEXT_BACKUP_FILE_PATH).expect("Unable to read file");
 
     // decrypt buffer
     let shared_key = SharedKey::new(password_to_key(password));
@@ -402,11 +395,7 @@ fn write_secrets(password: &str, secrets: HashMap<String, String>) {
     let serialized_encrypted_message: Vec<u8> = encrypted_message.serialize();
 
     // write out
-    fs::write(
-        get_home_dir() + CIPHERTEXT_FILE_PATH,
-        serialized_encrypted_message,
-    )
-    .expect("Unable to write file");
+    fs::write(get_home_dir() + CIPHERTEXT_FILE_PATH, serialized_encrypted_message).expect("Unable to write file");
 }
 
 fn write_backup_secrets(password: &str, secrets: HashMap<String, String>) {
@@ -441,10 +430,7 @@ fn password_to_key(password: &str) -> [u8; 32] {
     result
 }
 
-fn show_diff(
-    staying_secrets: &HashMap<String, String>,
-    changing_secrets: &HashMap<String, String>,
-) {
+fn show_diff(staying_secrets: &HashMap<String, String>, changing_secrets: &HashMap<String, String>) {
     // print keys and secrets subject to change
     println!("\n{}", "Diff:".cyan());
     for (key, secret) in changing_secrets.iter() {
@@ -496,8 +482,7 @@ fn init() -> Result<String, String> {
         return Err("Passwords don't match".to_string());
     }
 
-    fs::create_dir_all(get_home_dir() + CIPHERTEXT_FILE_FOLDER)
-        .expect("Unable to create directory");
+    fs::create_dir_all(get_home_dir() + CIPHERTEXT_FILE_FOLDER).expect("Unable to create directory");
 
     // create secret and backup files
     let secrets = HashMap::new();
