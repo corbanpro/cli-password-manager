@@ -1,4 +1,4 @@
-#!bin/bash
+#!/bin/bash
 
-cargo build
-sudo mv ./target/debug/secrets /usr/local/bin/
+cargo build --release
+cp ./target/release/secrets ~/.local/bin/
