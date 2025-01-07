@@ -56,8 +56,8 @@ fn main() {
             "b" => backup(&password),
             "rs" => restore_from_backup(&password),
             "cl" => clear_terminal(),
-
             "Q" | "q" => {
+                clear_terminal();
                 break;
             }
             "?" | "h" | "H" | "help" => {
