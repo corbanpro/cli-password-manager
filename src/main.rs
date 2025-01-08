@@ -309,7 +309,8 @@ fn restore_from_backup(password: &str) {
 }
 
 fn clear_terminal() {
-    print!("{}[2J", 27 as char);
+    let _ = std::process::Command::new("clear").status();
+    let _ = std::process::Command::new("cls").status();
     std::io::stdout().flush().unwrap();
 }
 
